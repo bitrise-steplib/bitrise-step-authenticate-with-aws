@@ -1,0 +1,27 @@
+Planning:
+
+Challenge for ourselves:
+According to the docs, aws CLI picks up credentials from the predefined environment variables. If the step does not
+support anything else, the step is a bit useless?
+
+Inputs:
+- aws-region: required? Could we use the "AWS_REGION environment variable as a default?
+- AWS_ACCESS_KEY_ID
+- AWS_ACCESS_KEY_ID
+- (optional) session token?
+- (optional) roleToAssume?
+
+
+Output:
+
+Export env vars:
+
+In the related github-action, "outputEnvCredentials" input defines if the credentials are exported as environment variables.
+
+AWS_REGION
+AWS_ACCESS_KEY_ID <= has to a sensitive output
+AWS_SECRET_ACCESS_KEY <= has to a sensitive output
+
+Should we write ~/.aws/credentials file?
+
+Should we export $CACHE_AWS_ACCESS_KEY_ID and $CACHE_AWS_SECRET_ACCESS_KEY?
