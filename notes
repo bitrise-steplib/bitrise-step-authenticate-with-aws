@@ -19,9 +19,9 @@ Export env vars:
 In the related github-action, "outputEnvCredentials" input defines if the credentials are exported as environment variables.
 
 AWS_REGION
-AWS_ACCESS_KEY_ID <= has to a sensitive output
-AWS_SECRET_ACCESS_KEY <= has to a sensitive output
+AWS_ACCESS_KEY_ID <= has to a be sensitive output
+AWS_SECRET_ACCESS_KEY <= has to a be sensitive output
 
-Should we write ~/.aws/credentials file?
+Should we write ~/.aws/credentials file? => No, the github-action does do this either.
 
-Should we export $CACHE_AWS_ACCESS_KEY_ID and $CACHE_AWS_SECRET_ACCESS_KEY?
+Should we export $CACHE_AWS_ACCESS_KEY_ID and $CACHE_AWS_SECRET_ACCESS_KEY? <= these are inputs for our own bitrise-save-s3-cache step
