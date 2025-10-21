@@ -1,0 +1,125 @@
+---
+title: Authenticate with Amazon Web Services (AWS)
+summary: The step authenticates with AWS using an OIDC token.
+description: |-
+  This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token.
+
+  It retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
+
+  The generated AWS credentials are then set as environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`) for use in subsequent steps.
+website: https://github.com/bitrise-steplib/bitrise-step-authenticate-with-aws
+source_code_url: https://github.com/bitrise-steplib/bitrise-step-authenticate-with-aws
+support_url: https://github.com/bitrise-steplib/bitrise-step-authenticate-with-aws/issues
+
+type_tags:
+- utility
+
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/bitrise-step-authenticate-with-aws
+
+inputs:
+- audience:
+  opts:
+    category: Identity token
+    title: Token audience
+    summary: The audience for the identity token.
+    description: |-
+      The audience for the identity token.
+
+      This could be the URL of the service you want to access with the token or a specific identifier provided by the service.
+    is_required: true
+
+- role_arn:
+  opts:
+    category: Identity token
+    title: AWS Role ARN
+    summary: The ARN of the AWS role to assume.
+    description: |-
+      The ARN of the AWS role to assume.
+
+      You can find the ARN in the AWS Management Console under IAM roles.
+    is_required: true
+
+- region: us-east-1
+  opts:
+    category: Identity token
+    title: AWS Region
+    summary: The AWS region to use.
+    description: |-
+      The AWS region to use.
+    is_required: true
+
+- session_name: bitrise-$BITRISE_BUILD_NUMBER
+  opts:
+    category: Identity token
+    title: AWS Session Name
+    summary: The session name for the assumed role.
+    description: |-
+      The session name for the assumed role.
+
+      If not provided, a default name will be generated with the format `bitrise-<build-number>`.
+    is_required: false
+
+- docker_login: "false"
+  opts:
+    category: Docker
+    title: Docker login
+    summary: |-
+      Performs Docker login with an auth token.
+    description: |-
+      Performs Docker login with an auth token.
+    is_required: true
+    value_options:
+    - "true"
+    - "false"
+
+- build_url: $BITRISE_BUILD_URL
+  opts:
+    category: API settings
+    title: Bitrise build url
+    summary: Unique build URL of this build on Bitrise.io.
+    description: |-
+      Unique build URL of this build on Bitrise.io.
+
+      By default the step will use the Bitrise API.
+    is_required: true
+    is_dont_change_value: true
+
+- build_api_token: $BITRISE_BUILD_API_TOKEN
+  opts:
+    category: API settings
+    title: Bitrise build token
+    summary: The build's API Token for the build on Bitrise.io
+    description: |-
+      The build's API Token for the build on Bitrise.io
+
+      This will be used to communicate with the Bitrise API
+    is_required: true
+    is_sensitive: true
+
+- verbose: "false"
+  opts:
+    category: Debug
+    title: Enable verbose logging
+    summary: Enable logging additional information for debugging.
+    is_required: true
+    value_options:
+    - "true"
+    - "false"
+
+outputs:
+- AWS_ACCESS_KEY_ID:
+  opts:
+    title: AWS Access Key ID
+    summary: The newly generated AWS access key ID.
+
+- AWS_SECRET_ACCESS_KEY:
+  opts:
+    title: AWS Secret Access Key
+    summary: The newly generated AWS secret access key.
+
+- AWS_SESSION_TOKEN:
+  opts:
+    title: AWS Session Token
+    summary: The newly generated AWS session token.
