@@ -76,7 +76,7 @@ inputs:
 
 - build_url: $BITRISE_BUILD_URL
   opts:
-    category: API settings
+    category: Debug
     title: Bitrise build url
     summary: Unique build URL of this build on Bitrise.io.
     description: |-
@@ -88,7 +88,7 @@ inputs:
 
 - build_api_token: $BITRISE_BUILD_API_TOKEN
   opts:
-    category: API settings
+    category: Debug
     title: Bitrise build token
     summary: The build's API Token for the build on Bitrise.io
     description: |-
