@@ -19,7 +19,16 @@ import (
 	"io"
 	"math"
 	"strings"
+	"time"
 )
+
+func deserializeS3Expires(v string) (*time.Time, error) {
+	t, err := smithytime.ParseHTTPDate(v)
+	if err != nil {
+		return nil, nil
+	}
+	return &t, nil
+}
 
 type awsAwsjson11_deserializeOpBatchCheckLayerAvailability struct {
 }
@@ -7618,35 +7627,6 @@ func awsAwsjson11_deserializeDocumentAwsEcrContainerImageDetails(v **types.AwsEc
 				return err
 			}
 
-		case "inUseCount":
-			if value != nil {
-				jtv, ok := value.(json.Number)
-				if !ok {
-					return fmt.Errorf("expected InUseCount to be json.Number, got %T instead", value)
-				}
-				i64, err := jtv.Int64()
-				if err != nil {
-					return err
-				}
-				sv.InUseCount = ptr.Int64(i64)
-			}
-
-		case "lastInUseAt":
-			if value != nil {
-				switch jtv := value.(type) {
-				case json.Number:
-					f64, err := jtv.Float64()
-					if err != nil {
-						return err
-					}
-					sv.LastInUseAt = ptr.Time(smithytime.ParseEpochSeconds(f64))
-
-				default:
-					return fmt.Errorf("expected Date to be a JSON Number, got %T instead", value)
-
-				}
-			}
-
 		case "platform":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -9516,89 +9496,6 @@ func awsAwsjson11_deserializeDocumentImageTagList(v *[]string, value interface{}
 	return nil
 }
 
-func awsAwsjson11_deserializeDocumentImageTagMutabilityExclusionFilter(v **types.ImageTagMutabilityExclusionFilter, value interface{}) error {
-	if v == nil {
-		return fmt.Errorf("unexpected nil of type %T", v)
-	}
-	if value == nil {
-		return nil
-	}
-
-	shape, ok := value.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("unexpected JSON type %v", value)
-	}
-
-	var sv *types.ImageTagMutabilityExclusionFilter
-	if *v == nil {
-		sv = &types.ImageTagMutabilityExclusionFilter{}
-	} else {
-		sv = *v
-	}
-
-	for key, value := range shape {
-		switch key {
-		case "filter":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected ImageTagMutabilityExclusionFilterValue to be of type string, got %T instead", value)
-				}
-				sv.Filter = ptr.String(jtv)
-			}
-
-		case "filterType":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected ImageTagMutabilityExclusionFilterType to be of type string, got %T instead", value)
-				}
-				sv.FilterType = types.ImageTagMutabilityExclusionFilterType(jtv)
-			}
-
-		default:
-			_, _ = key, value
-
-		}
-	}
-	*v = sv
-	return nil
-}
-
-func awsAwsjson11_deserializeDocumentImageTagMutabilityExclusionFilters(v *[]types.ImageTagMutabilityExclusionFilter, value interface{}) error {
-	if v == nil {
-		return fmt.Errorf("unexpected nil of type %T", v)
-	}
-	if value == nil {
-		return nil
-	}
-
-	shape, ok := value.([]interface{})
-	if !ok {
-		return fmt.Errorf("unexpected JSON type %v", value)
-	}
-
-	var cv []types.ImageTagMutabilityExclusionFilter
-	if *v == nil {
-		cv = []types.ImageTagMutabilityExclusionFilter{}
-	} else {
-		cv = *v
-	}
-
-	for _, value := range shape {
-		var col types.ImageTagMutabilityExclusionFilter
-		destAddr := &col
-		if err := awsAwsjson11_deserializeDocumentImageTagMutabilityExclusionFilter(&destAddr, value); err != nil {
-			return err
-		}
-		col = *destAddr
-		cv = append(cv, col)
-
-	}
-	*v = cv
-	return nil
-}
-
 func awsAwsjson11_deserializeDocumentImageTagsList(v *[]string, value interface{}) error {
 	if v == nil {
 		return fmt.Errorf("unexpected nil of type %T", v)
@@ -10764,15 +10661,6 @@ func awsAwsjson11_deserializeDocumentPullThroughCacheRule(v **types.PullThroughC
 				sv.CredentialArn = ptr.String(jtv)
 			}
 
-		case "customRoleArn":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected CustomRoleArn to be of type string, got %T instead", value)
-				}
-				sv.CustomRoleArn = ptr.String(jtv)
-			}
-
 		case "ecrRepositoryPrefix":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -10823,15 +10711,6 @@ func awsAwsjson11_deserializeDocumentPullThroughCacheRule(v **types.PullThroughC
 					return fmt.Errorf("expected Url to be of type string, got %T instead", value)
 				}
 				sv.UpstreamRegistryUrl = ptr.String(jtv)
-			}
-
-		case "upstreamRepositoryPrefix":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected PullThroughCacheRuleRepositoryPrefix to be of type string, got %T instead", value)
-				}
-				sv.UpstreamRepositoryPrefix = ptr.String(jtv)
 			}
 
 		default:
@@ -11605,11 +11484,6 @@ func awsAwsjson11_deserializeDocumentRepository(v **types.Repository, value inte
 				sv.ImageTagMutability = types.ImageTagMutability(jtv)
 			}
 
-		case "imageTagMutabilityExclusionFilters":
-			if err := awsAwsjson11_deserializeDocumentImageTagMutabilityExclusionFilters(&sv.ImageTagMutabilityExclusionFilters, value); err != nil {
-				return err
-			}
-
 		case "registryId":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -11768,11 +11642,6 @@ func awsAwsjson11_deserializeDocumentRepositoryCreationTemplate(v **types.Reposi
 					return fmt.Errorf("expected ImageTagMutability to be of type string, got %T instead", value)
 				}
 				sv.ImageTagMutability = types.ImageTagMutability(jtv)
-			}
-
-		case "imageTagMutabilityExclusionFilters":
-			if err := awsAwsjson11_deserializeDocumentImageTagMutabilityExclusionFilters(&sv.ImageTagMutabilityExclusionFilters, value); err != nil {
-				return err
 			}
 
 		case "lifecyclePolicy":
@@ -13656,15 +13525,6 @@ func awsAwsjson11_deserializeOpDocumentCreatePullThroughCacheRuleOutput(v **Crea
 				sv.CredentialArn = ptr.String(jtv)
 			}
 
-		case "customRoleArn":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected CustomRoleArn to be of type string, got %T instead", value)
-				}
-				sv.CustomRoleArn = ptr.String(jtv)
-			}
-
 		case "ecrRepositoryPrefix":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -13699,15 +13559,6 @@ func awsAwsjson11_deserializeOpDocumentCreatePullThroughCacheRuleOutput(v **Crea
 					return fmt.Errorf("expected Url to be of type string, got %T instead", value)
 				}
 				sv.UpstreamRegistryUrl = ptr.String(jtv)
-			}
-
-		case "upstreamRepositoryPrefix":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected PullThroughCacheRuleRepositoryPrefix to be of type string, got %T instead", value)
-				}
-				sv.UpstreamRepositoryPrefix = ptr.String(jtv)
 			}
 
 		default:
@@ -13921,15 +13772,6 @@ func awsAwsjson11_deserializeOpDocumentDeletePullThroughCacheRuleOutput(v **Dele
 				sv.CredentialArn = ptr.String(jtv)
 			}
 
-		case "customRoleArn":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected CustomRoleArn to be of type string, got %T instead", value)
-				}
-				sv.CustomRoleArn = ptr.String(jtv)
-			}
-
 		case "ecrRepositoryPrefix":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -13955,15 +13797,6 @@ func awsAwsjson11_deserializeOpDocumentDeletePullThroughCacheRuleOutput(v **Dele
 					return fmt.Errorf("expected Url to be of type string, got %T instead", value)
 				}
 				sv.UpstreamRegistryUrl = ptr.String(jtv)
-			}
-
-		case "upstreamRepositoryPrefix":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected PullThroughCacheRuleRepositoryPrefix to be of type string, got %T instead", value)
-				}
-				sv.UpstreamRepositoryPrefix = ptr.String(jtv)
 			}
 
 		default:
@@ -15270,11 +15103,6 @@ func awsAwsjson11_deserializeOpDocumentPutImageTagMutabilityOutput(v **PutImageT
 				sv.ImageTagMutability = types.ImageTagMutability(jtv)
 			}
 
-		case "imageTagMutabilityExclusionFilters":
-			if err := awsAwsjson11_deserializeDocumentImageTagMutabilityExclusionFilters(&sv.ImageTagMutabilityExclusionFilters, value); err != nil {
-				return err
-			}
-
 		case "registryId":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -15758,15 +15586,6 @@ func awsAwsjson11_deserializeOpDocumentUpdatePullThroughCacheRuleOutput(v **Upda
 				sv.CredentialArn = ptr.String(jtv)
 			}
 
-		case "customRoleArn":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected CustomRoleArn to be of type string, got %T instead", value)
-				}
-				sv.CustomRoleArn = ptr.String(jtv)
-			}
-
 		case "ecrRepositoryPrefix":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -15799,15 +15618,6 @@ func awsAwsjson11_deserializeOpDocumentUpdatePullThroughCacheRuleOutput(v **Upda
 					return fmt.Errorf("expected UpdatedTimestamp to be a JSON Number, got %T instead", value)
 
 				}
-			}
-
-		case "upstreamRepositoryPrefix":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected PullThroughCacheRuleRepositoryPrefix to be of type string, got %T instead", value)
-				}
-				sv.UpstreamRepositoryPrefix = ptr.String(jtv)
 			}
 
 		default:
@@ -15966,15 +15776,6 @@ func awsAwsjson11_deserializeOpDocumentValidatePullThroughCacheRuleOutput(v **Va
 				sv.CredentialArn = ptr.String(jtv)
 			}
 
-		case "customRoleArn":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected CustomRoleArn to be of type string, got %T instead", value)
-				}
-				sv.CustomRoleArn = ptr.String(jtv)
-			}
-
 		case "ecrRepositoryPrefix":
 			if value != nil {
 				jtv, ok := value.(string)
@@ -16018,15 +15819,6 @@ func awsAwsjson11_deserializeOpDocumentValidatePullThroughCacheRuleOutput(v **Va
 					return fmt.Errorf("expected Url to be of type string, got %T instead", value)
 				}
 				sv.UpstreamRegistryUrl = ptr.String(jtv)
-			}
-
-		case "upstreamRepositoryPrefix":
-			if value != nil {
-				jtv, ok := value.(string)
-				if !ok {
-					return fmt.Errorf("expected PullThroughCacheRuleRepositoryPrefix to be of type string, got %T instead", value)
-				}
-				sv.UpstreamRepositoryPrefix = ptr.String(jtv)
 			}
 
 		default:
