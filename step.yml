@@ -69,6 +69,8 @@ inputs:
       Performs Docker login with an auth token.
     description: |-
       Performs Docker login with an auth token.
+      
+      It is supported only on the Linux stacks.
     is_required: true
     value_options:
     - "true"
