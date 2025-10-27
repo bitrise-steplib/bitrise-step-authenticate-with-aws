@@ -31,7 +31,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `role_arn` | The ARN of the AWS role to assume.  You can find the ARN in the AWS Management Console under IAM roles. | required |  |
 | `region` | The AWS region to use. | required | `us-east-1` |
 | `session_name` | The session name for the assumed role.  If not provided, a default name will be generated with the format `bitrise-<build-number>`. |  | `bitrise-$BITRISE_BUILD_NUMBER` |
-| `docker_login` | Performs Docker login with an auth token. | required | `false` |
+| `docker_login` | Performs Docker login with an auth token.  It is supported only on the Linux stacks. | required | `false` |
 | `build_url` | Unique build URL of this build on Bitrise.io.  By default the step will use the Bitrise API. | required | `$BITRISE_BUILD_URL` |
 | `build_api_token` | The build's API Token for the build on Bitrise.io  This will be used to communicate with the Bitrise API | required, sensitive | `$BITRISE_BUILD_API_TOKEN` |
 | `verbose` | Enable logging additional information for debugging. | required | `false` |
