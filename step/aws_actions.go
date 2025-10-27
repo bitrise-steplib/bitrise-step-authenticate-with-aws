@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -16,13 +15,8 @@ import (
 	"github.com/bitrise-io/go-utils/v2/command"
 )
 
-func (a Authenticator) authenticate(region, roleArn, sessionName, identityToken string) (Result, error) {
+func (a Authenticator) authenticate(cfg aws.Config, roleArn, sessionName, identityToken string) (Result, error) {
 	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
-	if err != nil {
-		return Result{}, fmt.Errorf("failed to load AWS configuration: %w", err)
-	}
-
 	client := sts.NewFromConfig(cfg)
 	response, err := client.AssumeRoleWithWebIdentity(ctx, &sts.AssumeRoleWithWebIdentityInput{
 		RoleArn:          aws.String(roleArn),
@@ -53,13 +47,8 @@ func (a Authenticator) authenticate(region, roleArn, sessionName, identityToken 
 	return result, nil
 }
 
-func (a Authenticator) loginWithDocker(region string, result Result) error {
+func (a Authenticator) loginWithDocker(cfg aws.Config, result Result) error {
 	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
-	if err != nil {
-		return fmt.Errorf("failed to load AWS configuration: %w", err)
-	}
-
 	cfg.Credentials = aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
 		aws.ToString(&result.AccessKeyId),
 		aws.ToString(&result.SecretAccessKey),

@@ -1,8 +1,10 @@
 package step
 
 import (
+	"context"
 	"fmt"
 
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/bitrise-io/go-steputils/v2/export"
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
 	"github.com/bitrise-io/go-utils/v2/command"
@@ -64,7 +66,13 @@ func (a Authenticator) Run(config Config) (Result, error) {
 
 	a.logger.Printf("Identity token fetched.\n")
 
-	result, err := a.authenticate(config.Region, config.RoleArn, config.SessionName, identityToken)
+	ctx := context.Background()
+	awscfg, err := awsconfig.LoadDefaultConfig(ctx, awsconfig.WithRegion(config.Region))
+	if err != nil {
+		return Result{}, fmt.Errorf("failed to load AWS configuration: %w", err)
+	}
+
+	result, err := a.authenticate(awscfg, config.RoleArn, config.SessionName, identityToken)
 	if err != nil {
 		return Result{}, fmt.Errorf("AWS authenticate failure: %w", err)
 	}
@@ -72,7 +80,7 @@ func (a Authenticator) Run(config Config) (Result, error) {
 	a.logger.Printf("Successful AWS authentication.\n")
 
 	if config.DockerLogin {
-		if err := a.loginWithDocker(config.Region, result); err != nil {
+		if err := a.loginWithDocker(awscfg, result); err != nil {
 			return Result{}, fmt.Errorf("docker login failure: %w", err)
 		}
 
