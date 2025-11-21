@@ -1,8 +1,8 @@
 ---
 title: Authenticate with Amazon Web Services (AWS)
-summary: The step authenticates with AWS using an OIDC token.
+summary: The step authenticates with AWS using an OIDC token or access key.
 description: |-
-  This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token or an account key.
+  This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token or an access key.
 
   For OIDC based authentication it retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
 

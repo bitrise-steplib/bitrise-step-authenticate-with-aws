@@ -55,7 +55,7 @@ func (a Authenticator) ProcessConfig() (Config, error) {
 	}
 
 	if !accessKeyAuth && !identityAuth {
-		return Config{}, fmt.Errorf("no valid authentication method set")
+		return Config{}, fmt.Errorf("no valid authentication method set (provide Access Key or Identity Token details)")
 	}
 
 	return Config{
