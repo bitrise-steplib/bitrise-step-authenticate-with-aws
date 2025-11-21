@@ -5,24 +5,28 @@ import (
 )
 
 type Input struct {
-	BuildURL    string          `env:"build_url,required"`
-	BuildToken  stepconf.Secret `env:"build_api_token,required"`
-	Audience    string          `env:"audience,required"`
-	RoleArn     string          `env:"role_arn,required"`
-	Region      string          `env:"region,required"`
-	SessionName string          `env:"session_name"`
-	DockerLogin bool            `env:"docker_login,opt[true,false]"`
-	Verbose     bool            `env:"verbose,opt[true,false]"`
+	BuildURL        string          `env:"build_url,required"`
+	BuildToken      stepconf.Secret `env:"build_api_token,required"`
+	AccessKeyId     stepconf.Secret `env:"access_key_id"`
+	SecretAccessKey stepconf.Secret `env:"secret_access_key"`
+	Audience        string          `env:"audience"`
+	RoleArn         string          `env:"role_arn"`
+	Region          string          `env:"region"`
+	SessionName     string          `env:"session_name"`
+	DockerLogin     bool            `env:"docker_login,opt[true,false]"`
+	Verbose         bool            `env:"verbose,opt[true,false]"`
 }
 
 type Config struct {
-	BuildURL    string
-	BuildToken  stepconf.Secret
-	Audience    string
-	RoleArn     string
-	Region      string
-	SessionName string
-	DockerLogin bool
+	BuildURL        string
+	BuildToken      stepconf.Secret
+	AccessKeyId     stepconf.Secret
+	SecretAccessKey stepconf.Secret
+	Audience        string
+	RoleArn         string
+	Region          string
+	SessionName     string
+	DockerLogin     bool
 }
 
 type Result struct {
