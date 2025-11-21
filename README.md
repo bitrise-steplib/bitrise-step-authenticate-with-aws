@@ -2,12 +2,12 @@
 
 [![Step changelog](https://shields.io/github/v/release/bitrise-steplib/bitrise-step-authenticate-with-aws?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/bitrise-step-authenticate-with-aws/releases)
 
-The step authenticates with AWS using an OIDC token.
+The step authenticates with AWS using an OIDC token or access key.
 
 <details>
 <summary>Description</summary>
 
-This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token or an account key.
+This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token or an access key.
 
 For OIDC based authentication it retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
 
