@@ -13,36 +13,108 @@ import (
 )
 
 func TestConfigParsing(t *testing.T) {
-	config := Config{
-		BuildURL:    "build-url",
-		BuildToken:  stepconf.Secret("build-token"),
-		Audience:    "audience",
-		RoleArn:     "role-arn",
-		Region:      "region",
-		SessionName: "session-name",
-		DockerLogin: true,
+	tests := []struct {
+		name           string
+		env            map[string]string
+		expectedConfig Config
+		expectError    bool
+	}{
+		{
+			name: "valid config with account key",
+			env: map[string]string{
+				"build_url":         "build-url",
+				"build_api_token":   "build-token",
+				"access_key_id":     "access-key-id",
+				"secret_access_key": "secret-access-key",
+				"audience":          "",
+				"role_arn":          "",
+				"session_name":      "",
+				"region":            "us-east-1",
+				"docker_login":      "false",
+				"verbose":           "false",
+			},
+			expectedConfig: Config{
+				BuildURL:        "build-url",
+				BuildToken:      "build-token",
+				AccessKeyId:     "access-key-id",
+				SecretAccessKey: "secret-access-key",
+				Audience:        "",
+				RoleArn:         "",
+				Region:          "us-east-1",
+				SessionName:     "",
+				DockerLogin:     false,
+			},
+			expectError: false,
+		},
+		{
+			name: "valid config with identity token",
+			env: map[string]string{
+				"build_url":         "build-url",
+				"build_api_token":   "build-token",
+				"access_key_id":     "",
+				"secret_access_key": "",
+				"audience":          "audience",
+				"role_arn":          "role-arn",
+				"session_name":      "session-name",
+				"region":            "us-east-1",
+				"docker_login":      "false",
+				"verbose":           "false",
+			},
+			expectedConfig: Config{
+				BuildURL:        "build-url",
+				BuildToken:      "build-token",
+				AccessKeyId:     "",
+				SecretAccessKey: "",
+				Audience:        "audience",
+				RoleArn:         "role-arn",
+				Region:          "us-east-1",
+				SessionName:     "session-name",
+				DockerLogin:     false,
+			},
+			expectError: false,
+		},
+		{
+			name: "error when both account key and identity config are set",
+			env: map[string]string{
+				"build_url":         "build-url",
+				"build_api_token":   "build-token",
+				"access_key_id":     "access-key-id",
+				"secret_access_key": "secret-access-key",
+				"audience":          "audience",
+				"role_arn":          "role-arn",
+				"session_name":      "session-name",
+				"region":            "us-east-1",
+				"docker_login":      "false",
+				"verbose":           "false",
+			},
+			expectedConfig: Config{},
+			expectError:    true,
+		},
 	}
 
-	mockEnvRepository := mocks.NewRepository(t)
-	mockEnvRepository.On("Get", "build_url").Return(config.BuildURL)
-	mockEnvRepository.On("Get", "build_api_token").Return(string(config.BuildToken))
-	mockEnvRepository.On("Get", "audience").Return(config.Audience)
-	mockEnvRepository.On("Get", "role_arn").Return(config.RoleArn)
-	mockEnvRepository.On("Get", "region").Return(config.Region)
-	mockEnvRepository.On("Get", "session_name").Return(config.SessionName)
-	mockEnvRepository.On("Get", "docker_login").Return("true")
-	mockEnvRepository.On("Get", "verbose").Return("false")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockEnvRepository := mocks.NewRepository(t)
+			for k, v := range tt.env {
+				mockEnvRepository.On("Get", k).Return(v)
+			}
 
-	inputParser := stepconf.NewInputParser(mockEnvRepository)
-	mockFactory := mocks.NewFactory(t)
-	exporter := export.NewExporter(mocks.NewFactory(t))
-	sut := NewAuthenticator(inputParser, mockEnvRepository, mockFactory, exporter, log.NewLogger())
+			inputParser := stepconf.NewInputParser(mockEnvRepository)
+			mockFactory := mocks.NewFactory(t)
+			exporter := export.NewExporter(mocks.NewFactory(t))
+			sut := NewAuthenticator(inputParser, mockEnvRepository, mockFactory, exporter, log.NewLogger())
 
-	receivedConfig, err := sut.ProcessConfig()
-	assert.NoError(t, err)
-	assert.Equal(t, config, receivedConfig)
+			receivedConfig, err := sut.ProcessConfig()
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedConfig, receivedConfig)
+			}
 
-	mockEnvRepository.AssertExpectations(t)
+			mockEnvRepository.AssertExpectations(t)
+		})
+	}
 }
 
 func TestExport(t *testing.T) {

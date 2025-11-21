@@ -47,34 +47,57 @@ func (a Authenticator) ProcessConfig() (Config, error) {
 	a.logger.Println()
 	a.logger.EnableDebugLog(input.Verbose)
 
+	accessKeyAuth := input.AccessKeyId != "" && input.SecretAccessKey != ""
+	identityAuth := input.Audience != "" && input.RoleArn != "" && input.Region != ""
+
+	if accessKeyAuth && identityAuth {
+		return Config{}, fmt.Errorf("only one authentication method can be used at a time (either Access Key or Identity Token)")
+	}
+
+	if !accessKeyAuth && !identityAuth {
+		return Config{}, fmt.Errorf("no valid authentication method set")
+	}
+
 	return Config{
-		BuildURL:    input.BuildURL,
-		BuildToken:  input.BuildToken,
-		Audience:    input.Audience,
-		RoleArn:     input.RoleArn,
-		Region:      input.Region,
-		SessionName: input.SessionName,
-		DockerLogin: input.DockerLogin,
+		BuildURL:        input.BuildURL,
+		BuildToken:      input.BuildToken,
+		AccessKeyId:     input.AccessKeyId,
+		SecretAccessKey: input.SecretAccessKey,
+		Audience:        input.Audience,
+		RoleArn:         input.RoleArn,
+		Region:          input.Region,
+		SessionName:     input.SessionName,
+		DockerLogin:     input.DockerLogin,
 	}, nil
 }
 
 func (a Authenticator) Run(config Config) (Result, error) {
-	identityToken, err := a.identityToken(config.BuildURL, config.BuildToken, config.Audience)
-	if err != nil {
-		return Result{}, err
-	}
-
-	a.logger.Printf("Identity token fetched.\n")
-
 	ctx := context.Background()
 	awscfg, err := awsconfig.LoadDefaultConfig(ctx, awsconfig.WithRegion(config.Region))
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to load AWS configuration: %w", err)
 	}
 
-	result, err := a.authenticate(awscfg, config.RoleArn, config.SessionName, identityToken)
-	if err != nil {
-		return Result{}, fmt.Errorf("AWS authenticate failure: %w", err)
+	var result Result
+
+	if config.AccessKeyId != "" && config.SecretAccessKey != "" {
+		result = Result{
+			AccessKeyId:     string(config.AccessKeyId),
+			SecretAccessKey: string(config.SecretAccessKey),
+			SessionToken:    "",
+		}
+	} else {
+		identityToken, err := a.identityToken(config.BuildURL, config.BuildToken, config.Audience)
+		if err != nil {
+			return Result{}, err
+		}
+
+		a.logger.Printf("Identity token fetched.\n")
+
+		result, err = a.authenticate(awscfg, config.RoleArn, config.SessionName, identityToken)
+		if err != nil {
+			return Result{}, fmt.Errorf("AWS authenticate failure: %w", err)
+		}
 	}
 
 	a.logger.Printf("Successful AWS authentication.\n")

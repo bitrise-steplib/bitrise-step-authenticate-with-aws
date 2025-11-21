@@ -2,9 +2,11 @@
 title: Authenticate with Amazon Web Services (AWS)
 summary: The step authenticates with AWS using an OIDC token.
 description: |-
-  This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token.
+  This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token or an account key.
 
-  It retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
+  For OIDC based authentication it retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
+
+  The access key details can be created on the AWS Management Console under IAM roles.
 
   The generated AWS credentials are then set as environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`) for use in subsequent steps.
 website: https://github.com/bitrise-steplib/bitrise-step-authenticate-with-aws
@@ -19,6 +21,35 @@ toolkit:
     package_name: github.com/bitrise-steplib/bitrise-step-authenticate-with-aws
 
 inputs:
+- region: us-east-1
+  opts:
+    title: AWS Region
+    summary: The AWS region to use.
+    description: |-
+      The AWS region to use.
+
+- access_key_id:
+  opts:
+    category: Access key
+    title: AWS Access Key ID
+    summary: The AWS Access Key ID.
+    description: |-
+      The AWS Access Key ID.
+
+      You can get this from the AWS Console under IAM users.
+    is_sensitive: true
+
+- secret_access_key:
+  opts:
+    category: Access key
+    title: AWS Secret Access Key
+    summary: The AWS Secret Access Key.
+    description: |-
+      The AWS Secret Access Key.
+
+      You can get this from the AWS Console under IAM users.
+    is_sensitive: true
+
 - audience:
   opts:
     category: Identity token
@@ -28,7 +59,6 @@ inputs:
       The audience for the identity token.
 
       This could be the URL of the service you want to access with the token or a specific identifier provided by the service.
-    is_required: true
 
 - role_arn:
   opts:
@@ -39,16 +69,6 @@ inputs:
       The ARN of the AWS role to assume.
 
       You can find the ARN in the AWS Management Console under IAM roles.
-    is_required: true
-
-- region: us-east-1
-  opts:
-    category: Identity token
-    title: AWS Region
-    summary: The AWS region to use.
-    description: |-
-      The AWS region to use.
-    is_required: true
 
 - session_name: bitrise-$BITRISE_BUILD_NUMBER
   opts:
