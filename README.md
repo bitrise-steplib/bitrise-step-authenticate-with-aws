@@ -2,14 +2,16 @@
 
 [![Step changelog](https://shields.io/github/v/release/bitrise-steplib/bitrise-step-authenticate-with-aws?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/bitrise-step-authenticate-with-aws/releases)
 
-The step authenticates with AWS using an OIDC token.
+The step authenticates with AWS using an OIDC token or access key.
 
 <details>
 <summary>Description</summary>
 
-This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token.
+This step authenticates with Amazon Web Services (AWS) using an OpenID Connect (OIDC) token or an access key.
 
-It retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
+For OIDC based authentication it retrieves an identity token from Bitrise, assumes the specified AWS role using the token, and generates temporary AWS credentials.
+
+The access key details can be created on the AWS Management Console under IAM roles.
 
 The generated AWS credentials are then set as environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`) for use in subsequent steps.
 </details>
@@ -27,9 +29,11 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
-| `audience` | The audience for the identity token.  This could be the URL of the service you want to access with the token or a specific identifier provided by the service. | required |  |
-| `role_arn` | The ARN of the AWS role to assume.  You can find the ARN in the AWS Management Console under IAM roles. | required |  |
-| `region` | The AWS region to use. | required | `us-east-1` |
+| `region` | The AWS region to use. |  | `us-east-1` |
+| `access_key_id` | The AWS Access Key ID.  You can get this from the AWS Console under IAM users. | sensitive |  |
+| `secret_access_key` | The AWS Secret Access Key.  You can get this from the AWS Console under IAM users. | sensitive |  |
+| `audience` | The audience for the identity token.  This could be the URL of the service you want to access with the token or a specific identifier provided by the service. |  |  |
+| `role_arn` | The ARN of the AWS role to assume.  You can find the ARN in the AWS Management Console under IAM roles. |  |  |
 | `session_name` | The session name for the assumed role.  If not provided, a default name will be generated with the format `bitrise-<build-number>`. |  | `bitrise-$BITRISE_BUILD_NUMBER` |
 | `docker_login` | Performs Docker login with an auth token.  It is supported only on the Linux stacks. | required | `false` |
 | `build_url` | Unique build URL of this build on Bitrise.io.  By default the step will use the Bitrise API. | required | `$BITRISE_BUILD_URL` |
