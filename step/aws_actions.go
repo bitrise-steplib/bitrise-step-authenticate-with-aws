@@ -5,13 +5,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/bitrise-io/go-utils/errorutil"
 	"github.com/bitrise-io/go-utils/v2/command"
 )
 
@@ -81,7 +81,8 @@ func (a Authenticator) loginWithDocker(cfg aws.Config, result Result) error {
 		Stdin: strings.NewReader(password),
 	})
 	if output, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-		if errorutil.IsExitStatusError(err) {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			a.logger.Errorf("Docker login output: %s", output)
 		}
 		return err
