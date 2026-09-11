@@ -101,7 +101,7 @@ func TestConfigParsing(t *testing.T) {
 
 			inputParser := stepconf.NewInputParser(mockEnvRepository)
 			mockFactory := mocks.NewFactory(t)
-			exporter := export.NewExporter(mocks.NewFactory(t))
+			exporter := export.NewDefaultExporter(mocks.NewFactory(t))
 			sut := NewAuthenticator(inputParser, mockEnvRepository, mockFactory, exporter, log.NewLogger())
 
 			receivedConfig, err := sut.ProcessConfig()
@@ -131,7 +131,7 @@ func TestExport(t *testing.T) {
 
 	mockEnvRepository := mocks.NewRepository(t)
 	inputParser := stepconf.NewInputParser(mockEnvRepository)
-	exporter := export.NewExporter(mockFactory)
+	exporter := export.NewDefaultExporter(mockFactory)
 	sut := NewAuthenticator(inputParser, mockEnvRepository, mockFactory, exporter, log.NewLogger())
 
 	err := sut.Export(result)

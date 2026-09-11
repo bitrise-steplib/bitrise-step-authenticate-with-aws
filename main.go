@@ -46,7 +46,7 @@ func createTokenFetcher(logger log.Logger) step.Authenticator {
 	envRepository := stepenv.NewRepository(env.NewRepository())
 	inputParser := stepconf.NewInputParser(envRepository)
 	commandFactory := command.NewFactory(envRepository)
-	exporter := export.NewExporter(commandFactory)
+	exporter := export.NewDefaultExporter(commandFactory)
 
 	return step.NewAuthenticator(inputParser, envRepository, commandFactory, exporter, logger)
 }

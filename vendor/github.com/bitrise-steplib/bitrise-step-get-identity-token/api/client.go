@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
-	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-io/go-utils/v2/log"
+	"github.com/bitrise-io/go-utils/v2/retryhttp"
 )
 
 const (
@@ -30,7 +30,7 @@ type DefaultAPIClient struct {
 }
 
 func NewDefaultAPIClient(baseURL string, authToken stepconf.Secret, logger log.Logger) DefaultAPIClient {
-	httpClient := retry.NewHTTPClient().StandardClient()
+	httpClient := retryhttp.NewClient(logger).StandardClient()
 	httpClient.Timeout = time.Second * timeout
 
 	return DefaultAPIClient{
